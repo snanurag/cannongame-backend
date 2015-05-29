@@ -20,7 +20,10 @@ public class RetrieveScore extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-		resp.setContentType("application/json");
+    	resp.setHeader("Access-Control-Allow-Origin","http://localhost");
+        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setContentType("application/json");
 		
 		DatastoreService datastore = DatastoreServiceFactory
 				.getDatastoreService();
@@ -46,7 +49,7 @@ public class RetrieveScore extends HttpServlet {
 		Map scoreMap = entity.getProperties();
 
 		for (Object name : scoreMap.keySet()) {
-			json += name + ":" + scoreMap.get(name) + ",";
+			json += "\""+name + "\":" + scoreMap.get(name) + ",";
 		}
 		int endIndex = json.lastIndexOf(",");
 		json = json.substring(0, endIndex);

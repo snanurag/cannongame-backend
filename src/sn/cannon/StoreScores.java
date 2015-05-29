@@ -17,8 +17,9 @@ public class StoreScores extends HttpServlet{
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
    
-    	Map paramMap =    	req.getParameterMap();	
-    	 
+    	resp.setHeader("Access-Control-Allow-Origin","http://localhost");
+
+    	Map paramMap = req.getParameterMap();	
     	
     	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     	Entity entity = new Entity("version_1_0", req.getParameter("email"));
