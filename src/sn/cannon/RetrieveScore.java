@@ -20,9 +20,9 @@ public class RetrieveScore extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-    	resp.setHeader("Access-Control-Allow-Origin","http://localhost");
-        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    	resp.setHeader("Access-Control-Allow-Origin","http://pune869");
+//        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+//        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
         resp.setContentType("application/json");
 		
 		DatastoreService datastore = DatastoreServiceFactory
@@ -38,9 +38,7 @@ public class RetrieveScore extends HttpServlet {
 		try {
 			entity = datastore.get(key);
 		} catch (EntityNotFoundException e) {
-
-			json += "24301 : 0}";
-
+			json += "}";
 			resp.getOutputStream().print(json);
 			resp.getOutputStream().close();
 			return;
