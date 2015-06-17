@@ -20,8 +20,9 @@ public class RetrieveScore extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-    	resp.setHeader("Access-Control-Allow-Origin","http://pune869");
-//        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+//    	resp.setHeader("Access-Control-Allow-Origin","http://pune869");
+    	resp.setHeader("Access-Control-Allow-Origin","http://cannonballs.in");
+    	//        resp.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
 //        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
         resp.setContentType("application/json");
 		

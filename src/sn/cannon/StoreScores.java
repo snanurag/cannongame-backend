@@ -20,7 +20,8 @@ public class StoreScores extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
-		resp.setHeader("Access-Control-Allow-Origin", "http://pune869");
+//    	resp.setHeader("Access-Control-Allow-Origin","http://pune869");
+		resp.setHeader("Access-Control-Allow-Origin", "http://cannonballs.in");
 
 		Map paramMap = req.getParameterMap();
 
