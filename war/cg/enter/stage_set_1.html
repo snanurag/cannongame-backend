@@ -1,0 +1,220 @@
+
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<script src="../js/jquery-1.9.1.min.js"></script>
+	<script src="../js/ivank.js"></script>
+	<script src="anims/anim_bomb.js"></script>
+	<script src="anim_utils.js"></script>
+	<script src="../util.js"></script>
+	<script src="../js/jquery.cookie.js"></script>
+	
+	
+<!--	<script src="../js/jquery.mobile-1.3.2.min.js"></script> -->
+	<script type="text/javascript">
+		var stage, cur = null;
+//		alert(Math.floor(window.innerWidth));
+		var w = window.innerWidth * window.devicePixelRatio;
+		var h = window.innerHeight * window.devicePixelRatio;
+		
+		function Start()
+		{
+			stage = new Stage("c");
+
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+			var bg = new Bitmap( new BitmapData("images/bck_fp.png") );
+			bg.scaleX = window.devicePixelRatio;
+			bg.scaleY = window.devicePixelRatio;
+			stage.addChild(bg);
+			
+			var clearedStages;
+			
+			if($.cookie("clearedstages") != undefined)
+				clearedStages = JSON.parse($.cookie("clearedstages"));
+			else
+				clearedStages = {};
+				
+			var lastStage = 1;
+			
+			setStageIcon1('stage_icons/1.png', w/8, h/4);
+			
+			//Open next stage if this is cleared
+			if(clearedStages.hasOwnProperty(stages[0]))
+			{
+				setStageIcon2('stage_icons/2.png', 3*w/8, h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(3*w/8, h/4);
+				
+			if(clearedStages.hasOwnProperty(stages[1]))
+			{
+				setStageIcon3('stage_icons/3.png', 5*w/8, h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(5*w/8, h/4);
+
+			if(clearedStages.hasOwnProperty(stages[2]))
+			{
+			setStageIcon4('stage_icons/4.png', 7*w/8, h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(7*w/8, h/4);
+
+				
+			if(clearedStages.hasOwnProperty(stages[3]))
+			{
+				setStageIcon5('stage_icons/5.png', w/8, 3*h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(w/8, 3*h/4);
+
+			if(clearedStages.hasOwnProperty(stages[4]))
+			{
+				setStageIcon6('stage_icons/6.png', 3*w/8, 3*h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(3*w/8, 3*h/4);
+
+			if(clearedStages.hasOwnProperty(stages[5]))
+			{
+				setStageIcon7('stage_icons/7.png', 5*w/8, 3*h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(5*w/8, 3*h/4);
+
+			if(clearedStages.hasOwnProperty(stages[6]))
+			{
+				setStageIcon8('stage_icons/8.png', 7*w/8, 3*h/4);
+				lastStage += 1;
+			}
+			else
+				setStageIconDisabled(7*w/8, 3*h/4);
+				
+			initializeBombAnim();
+			startBombBurningDeamon(stage, 1, lastStage);
+		}
+
+		
+		function setStageIcon1(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD1 );
+		}
+
+		function onMD1(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=24301.json&attempts=0');
+			
+		}
+
+		function setStageIcon2(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD2 );
+		}
+
+		function onMD2(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=1.json&attempts=0');
+		}
+
+		function setStageIcon3(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD3 );
+		}
+
+		function onMD3(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=59203.json&attempts=0');
+		}
+
+		function setStageIcon4(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD4 );
+		}
+
+		function onMD4(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=26904.json&attempts=0');
+		}
+		
+		function setStageIcon5(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD5 );
+		}
+
+		function onMD5(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=2.json&attempts=0');
+		}
+		
+		function setStageIcon6(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD6 );
+		}
+
+		function onMD6(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=8.406917822341853E8.json&attempts=0');
+		}
+		
+		function setStageIcon7(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD7 );
+		}
+
+		function onMD7(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=8.667454087194089E8.json&attempts=0');
+		}
+		
+		function setStageIcon8(image, x, y)
+		{
+			//Bitmap of stage icon
+			var b = setStageIcon(image, x, y);
+			b.addEventListener(MouseEvent.MOUSE_DOWN, onMD8 );
+		}
+
+		function onMD8(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", '../cannongame.html?level=5.2186478797800064E8.json&attempts=0');
+		}
+		
+		
+		
+	</script>
+</head>
+<body onload="Start();" style="overflow-y: hidden;">
+<canvas id="c" width="500" height="300"></canvas>
+</div>
+</body>
+
+</html>

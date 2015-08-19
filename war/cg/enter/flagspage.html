@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<script type="text/javascript" src="../js/ivank.js"></script>
+	<script src="../js/jquery-1.9.1.min.js"></script>
+	<script src="sound.js"></script>
+	<script src="../util.js"></script>
+	<script src="anim_utils.js"></script>
+	<script src="anims/anim_sound.js"></script>
+	<script src="anims/anim_music.js"></script>
+	<script src="anims/anim_tracer.js"></script>
+	<script src="anims/anim_credit.js"></script>
+
+	<script type="text/javascript">
+	
+		var stage, cur = null;
+//		alert(Math.floor(window.innerWidth));
+		var w = window.innerWidth * window.devicePixelRatio;
+		var h = window.innerHeight * window.devicePixelRatio;
+//		var imageHalfW = 40;
+//		var imageHalfH = 62;
+		var count_flag = 16;
+		var flagWidth = 51 * window.devicePixelRatio;
+		var flagHeight = 68 * window.devicePixelRatio;
+		var flagHeightShift = 18 * window.devicePixelRatio;
+		var FRAME_RATE_FLAG = 100;
+
+		var imgs = [];
+		
+		function initialize()
+		{
+	
+			initializeMusicAnim();
+			initializeSoundAnim();
+			initializeTracerAnim();
+			initializeShopAnim();
+		}
+		
+		function Start()
+		{
+			stage = new Stage("c");
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+			initialize();
+			setMusicAnim();
+			setSoundAnim();
+			startWithTracerStop(stage);
+			setShopAnim();
+		}
+
+		function onMOv(e){ e.target.alpha = 1.0; }
+		function onMOu(e){ e.target.alpha = 0.9; }
+		function onMU (e){ cur = null; }
+
+		function setStageIcon(b, x, y)
+		{
+			b.x = Math.floor(x - imageHalfW);
+			b.y = Math.floor(y - imageHalfH);
+			b.buttonMode = true;
+			b.alpha = 0.9;
+			stage.addChild(b);
+				
+			b.addEventListener(MouseEvent.MOUSE_OVER, onMOv);
+			b.addEventListener(MouseEvent.MOUSE_OUT , onMOu);
+			b.addEventListener(MouseEvent.MOUSE_UP  , onMU );
+			
+			//Returning Bitmap type.
+			return b;
+		}
+
+		//Music buttons
+		function setMusicAnim()
+		{
+			//Bitmap of stage icon
+			getMetaTag('music').content = 'on';
+			playIntroSound();
+			animMusic(1, stage);
+		}
+
+		function onMDMusic(e)
+		{
+			setMusicAnim();
+		}
+
+		function setMusicAnimp()
+		{
+			//Bitmap of stage icon
+			getMetaTag('music').content = 'off';
+			stopIntroSound();
+		}
+
+		function onMDMusicp(e)
+		{
+			setMusicAnimp();
+		}
+		
+		// Sound buttons
+		function setSoundAnim()
+		{
+			//Bitmap of stage icon
+			getMetaTag('sound').content = 'on';
+			animSound(1, stage);
+		}
+
+		function onMDSound(e)
+		{
+			setSoundAnim();
+		}
+
+		function setSoundAnimp()
+		{
+			//Bitmap of stage icon
+			getMetaTag('sound').content = 'off';
+		}
+
+		function onMDSoundp(e)
+		{
+			setSoundAnimp();
+		}
+
+		//tracer buttons
+		function setTracerAnim()
+		{
+			//Bitmap of stage icon
+			getMetaTag('tracer').content = 'on';
+			animTracer(1, stage);
+		}
+
+		function onMDTracer(e)
+		{
+			setTracerAnim();
+		}
+
+		function setTracerAnimp()
+		{
+			//Bitmap of stage icon
+			getMetaTag('tracer').content = 'off';
+		}
+
+		function onMDTracerp(e)
+		{
+			setTracerAnimp();
+		}
+		
+		//Shop button
+		function setShopAnim()
+		{
+			//Bitmap of stage icon
+			animShop(0, stage);
+		}
+		
+		function onMDShop(e)
+		{
+			var ifrm = onMD();
+			ifrm.setAttribute("src", 'credit_page.html');
+		}
+		
+	</script>
+</head>
+<body onload="Start();" style="overflow-y: hidden;">
+<canvas id="c" width="600" height="300"></canvas>
+</body>
+
+</html>		

@@ -1,0 +1,54 @@
+{"imagelist":[
+        {
+            "x": 0,
+            "y": "max",
+            "width" : 1.5,
+            "height" : 0.8,
+            "bitmapWidth": -149,
+            "bitmapHeight":-98,
+            "image":"img/castle/castle1.png",
+            "shape": "polygon",
+            "type": "static",
+            "name":"building3",
+            "description": "Target 1 ",
+			"friction" : 1,
+			"restitution" : 0,
+			"centerX" : 0,
+			"centerY" : 0
+			
+        },
+        {
+            "x":-6,
+            "y": "max",
+            "width" : 1.5,
+            "height" : 0.5,
+            "bitmapWidth": -300,
+            "bitmapHeight":-100,
+            "image":"img/cannon_1.png",
+            "shape": "polygon",
+            "type": "kinematic",
+            "name":"cannon",
+            "description": "Cannon 1",
+			"friction" : 0,
+			"restitution" : 0,
+			"centerX" : 0.6,
+			"centerY" : 0
+		},
+        {
+            "x":6,
+            "y": "max",
+            "width" : 1.5,
+            "height" : 0.5,
+            "bitmapWidth": -300,
+            "bitmapHeight":-100,
+            "image":"img/cannon_2.png",
+            "shape": "polygon",
+            "type": "kinematic",
+            "name":"cannon",
+            "description": "Cannon 2",
+			"friction" : 0,
+			"restitution" : 0,
+			"centerX" : 0.6,
+			"centerY" : 0
+	}            
+]}

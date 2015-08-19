@@ -1,0 +1,379 @@
+<html>
+<head>
+
+	<script src="js/ivank.js"></script>
+    <link type="text/css"  rel="stylesheet" href="css/cannongame.css"/>
+	<script src="js/jquery-1.9.1.min.js"></script>
+	<script src="util.js"></script>
+	<script src="scoring.js"></script>
+	<script src="sound.js"></script>
+
+	<script type="text/javascript" src="js/Box2dWeb-2.1.a.3.min.js"></script>
+    <script type="text/javascript" src="createstage.js"></script>
+	<script type="text/javascript" src="anims/anim_smoke.js"></script>
+	<script type="text/javascript" src="anims/anim_building1.js"></script>
+	<script type="text/javascript" src="anims/anim_building2.js"></script>
+	<script type="text/javascript" src="anims/anim_building3.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript">
+		var world;
+		var stage;
+		var bodies = [];	// instances of b2Body (from Box2D)
+		var actors = [];	// instances of Bitmap (from IvanK)
+		var cannons = [];
+		var balls = [];
+		var SCALE = 100;
+		var devScreenWidth = 1366;
+		var devScreenHeight = 643;
+		var scaleX;
+		var scaleY;
+		var MIN_VEL_BALL = 1.2;
+		var FRAME_RATE_MILLI_SEC = 100;
+		var MAX_BALLS = 2;
+		var endDetected = false;
+		var gameOverDone = false;
+		var numTargets = 0;
+		var ballsFired = false;
+		var totalBodies = 0;
+		var currentLevel;
+/*
+		//Cannon weld joint
+		var dynamicCannons = [];
+		var resetCannonA = false;
+		var resetCannonB = false;
+*/		
+		// Defined basic building components
+		var b2Vec2	 = Box2D.Common.Math.b2Vec2;
+		var b2BodyDef	 = Box2D.Dynamics.b2BodyDef;
+		var b2Body	 = Box2D.Dynamics.b2Body;
+		var b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+		var b2World	 = Box2D.Dynamics.b2World;
+		var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+		var b2CircleShape	= Box2D.Collision.Shapes.b2CircleShape;
+		var b2MassData = Box2D.Collision.Shapes.b2MassData;
+		var b2Transform = Box2D.Common.Math.b2Transform;
+		var b2Listener = Box2D.Dynamics.b2ContactListener;
+		var b2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
+		
+		function Start()
+        {
+		
+			gameStartIndication();
+//			setInterval(onEF, 20)
+			stage = new Stage("c");
+			stage.addEventListener(Event.ENTER_FRAME, onEF);
+//			stage.addEventListener(Event.ENTER_FRAME, recoil);
+			stage.addEventListener(MouseEvent.CLICK, Jump);
+			stage.addEventListener(MouseEvent.MOUSE_MOVE, cannonfocus);
+
+			//Initialize Animated Objects
+			initializeSmoke();
+			initializeBuilding1();
+			initializeBuilding2();
+			initializeBuilding3();
+
+			//Find the stage and attempt from the query parameters
+			var query = window.location.search.substring(1);
+			var sURLVariables = query.split('&');
+			currentLevel = sURLVariables[0].split("=")[1];
+			numOfAttempts = sURLVariables[1].split("=")[1];
+			
+			// background 
+			var bg = new Bitmap( new BitmapData(bckGrounds[getStage(currentLevel)-1]) );
+			bg.scaleX = stage.stageWidth/1920;
+			bg.scaleY = stage.stageHeight/1000;
+			stage.addChild(bg);
+
+			//Scaling factor for other screens than Development screen.
+			scaleX = stage.stageWidth/devScreenWidth;
+			scaleY = stage.stageHeight/devScreenHeight;
+
+			world = new b2World(new b2Vec2(0, 10),  true);
+
+			var listener = new b2Listener();
+			world.SetContactListener(listener);
+			listener.BeginContact = collapseBuilding;
+
+			// I decided that 1 meter = 100 pixels
+
+			var bxFixDef	= new b2FixtureDef();	// box  fixture definition
+			bxFixDef.shape	= new b2PolygonShape();
+			var blFixDef	= new b2FixtureDef();	// ball fixture definition
+			blFixDef.shape	= new b2CircleShape();
+			bxFixDef.density	= blFixDef.density = 1;
+			blFixDef.friction = 1;
+			blFixDef.restitution = 0.3;
+
+			var bodyDef = new b2BodyDef();
+			bodyDef.type = b2Body.b2_staticBody;
+
+            // create ground
+            bxFixDef.shape.SetAsBox(100, 1);
+            bodyDef.position.Set(stage.stageWidth/(SCALE*2), stage.stageHeight/SCALE + 1);
+            world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+			//create roof
+            bxFixDef.shape.SetAsBox(100, 1);
+            bodyDef.position.Set(stage.stageWidth/(SCALE*2), -1);
+            world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+			bxFixDef.shape.SetAsBox(1, 100);
+
+			// left wall
+			bodyDef.position.Set(-1, 3);
+			world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+			// right wall
+			bodyDef.position.Set(stage.stageWidth/SCALE + 1, 3);
+			world.CreateBody(bodyDef).CreateFixture(bxFixDef);
+
+
+			music = getMetaTag('music').content; 
+			sound = getMetaTag('sound').content;
+			tracer = getMetaTag('tracer').content;
+			
+			if(music == 'on')
+			{
+				playBackgroundSound();
+			}
+			
+			loadstage(stage, world, currentLevel);
+			
+		}
+
+		function onEF(e)
+		{
+			world.Step(1 / 60,  10,  3);
+			world.ClearForces();
+
+			for(var i=0; i<actors.length; i++)
+			{
+				var body  = bodies[i];
+				var actor = actors [i];
+				var p = body.GetPosition();
+				var userData = body.GetFixtureList().GetUserData();
+				actor.x = (p.x) *SCALE;	// updating actor
+				actor.y = (p.y) *SCALE;
+				actor.rotation = body.GetAngle()*180/Math.PI;
+			}
+			
+			if(ballsFired)
+			{
+				recoil(e);
+				
+				if(tracer == 'on')
+				{
+					drawLine(balls[0], stage);
+					drawLine(balls[1], stage);
+				}
+				endDetected = gameEndIndication(balls);
+				if(endDetected && !gameOverDone)
+				{
+					proceedForGameOver()
+				}
+			}
+			
+				
+/*				if(getMagnitude(balls[0].GetLinearVelocity()) < MIN_VEL_BALL && getMagnitude(balls[1].GetLinearVelocity()) < MIN_VEL_BALL)
+				{
+					window.location.reload()
+				}
+*/				
+		}
+
+		function Jump(e)
+		{
+			//TODO set a condition here to put the later code in action only if whole stage is stationary
+
+			//This condition makes sure that balls are fired only once.
+			if(!ballsFired)
+			{
+				//If there was no movement of cursor before clicking the mouse then this call will focus the cannon first, then cannon balls would be fired. 
+				cannonfocus(e);
+				
+				//On click on Screen, cannon balls would be added to screen.
+				addCannonBallToStage();
+
+				//This for loop will give impulse to cannons and will set the linear velocity.
+				for(var i=0; i<cannons.length; i++)
+				{
+					var body = cannons[i];
+					var position = body.GetPosition();
+
+					var impulse = getImpulse(e, body, 30);
+					impulse = new b2Vec2(-impulse.x, -impulse.y);
+					body.SetLinearVelocity(impulse);
+					
+					//This flag put the cannons at very low CPU usage. But it increased the response behavior of cannons.
+					body.SetAwake(true);
+				}
+
+				//This for loop will give impulse to balls
+				for(var i=0; i<balls.length; i++)
+				{
+					var impulse = getImpulse(e, balls[i]);
+					balls[i].ApplyImpulse(impulse, balls[i].GetWorldCenter());
+
+					//Play sound
+					stopBackgroundSound();
+					if(i == 0)
+						playCannon1Sound();
+					else
+						playCannon2Sound();
+					
+				}
+			
+				//Update the final totalBodies count.
+				totalBodies = bodies.length;
+				
+				//By this point balls are added to the stage and given the impulse.
+				ballsFired = true;
+			}
+       	}
+
+
+		//Event Function : This function is fired at the movement of mouse.
+       	function cannonfocus(e)
+       	{
+			if(!ballsFired)
+			{
+				var currentTarget = e.currentTarget;
+				var cursorX = currentTarget.mouseX/SCALE;
+				var cursorY = currentTarget.mouseY/SCALE;
+
+				for(var i=0; i<cannons.length; i++)
+				{
+					var body = cannons[i];
+					var position = body.GetPosition();
+					var bodyX = position.x;
+					var bodyY = position.y;
+
+					var dirX = -bodyX+cursorX;
+					var dirY = -bodyY+cursorY;
+
+					var angle = Math.atan(dirY/dirX);
+
+					if(dirX < 0)
+					{
+						angle = Math.PI + angle;
+					}
+					
+/*
+					//Cannon weld joint code
+					if(i == 0 && resetCannonA ==true)
+					{
+						body.SetAngle(body.GetFixtureList().GetUserData().previousAngle);
+						dynamicCannons[i].SetAngle(body.GetFixtureList().GetUserData().previousAngle);
+						resetCannonA = false;
+					}
+					else if(i == 1 && resetCannonB ==true)
+					{
+						body.SetAngle(body.GetFixtureList().GetUserData().previousAngle);
+						dynamicCannons[i].SetAngle(body.GetFixtureList().GetUserData().previousAngle);
+						resetCannonB = false;
+					}
+					else
+					{
+						body.SetAngle(angle);
+						dynamicCannons[i].SetAngle(angle);
+						body.GetFixtureList().GetUserData().previousAngle = angle;
+						dynamicCannons[i].GetFixtureList().GetUserData().previousAngle = angle;
+					}
+*/
+						body.SetAngle(angle);
+
+//					console.log('ball '+i+' angle '+angle);
+				}
+			}
+       	}
+
+	//Event Function : This function is fired at the event of touch of any two bodies on the screen.
+	function collapseBuilding(contact)
+	{
+		var userDataA = contact.GetFixtureA().GetUserData();
+		var userDataB = contact.GetFixtureB().GetUserData();
+
+		var bodyA = contact.GetFixtureA().m_body;
+		var bodyB = contact.GetFixtureB().m_body;
+		if(!endDetected)
+		{
+	
+/*
+			//Cannon weld joint code
+			if(userDataA != undefined && userDataA != null && userDataA.name == "dynamic_cannon")
+			{
+				if(userDataA.originalX < stage.stageWidth/(2*SCALE))
+					resetCannonA = true;
+				else
+					resetCannonB = true;
+			}
+			else if(userDataB != undefined && userDataB != null && userDataB.name == "dynamic_cannon")
+			{
+				if(userDataB.originalX < stage.stageWidth/(2*SCALE))
+					resetCannonA = true;
+				else
+					resetCannonB = true;
+			}
+*/
+			if(userDataA != undefined && userDataA != null && userDataB != undefined && userDataB != null)
+			{
+				var nameA = userDataA.name;
+				var nameB = userDataB.name;
+				if(userDataB.name == "cannon ball")
+				{
+					if(nameA == "building1")
+					{
+						animBuilding1(userDataA.originalX, userDataA.originalY, 0, userDataA.actor, bodyA);
+					}
+					else if(nameA == "building2")
+					{
+						animBuilding2(userDataA.originalX, userDataA.originalY, 0, userDataA.actor, bodyA);
+					}
+					else if(nameA == "building3")
+					{
+						animBuilding3(userDataA.originalX, userDataA.originalY, 0, userDataA.actor, bodyA);
+					}
+					playCannonCollision(userDataA, userDataB);
+				}
+				if(userDataA.name == "cannon ball")
+				{
+					if(nameB == "building1")
+					{
+						animBuilding1(userDataB.originalX, userDataB.originalY, 0, userDataB.actor, bodyB);
+					}
+					else if(nameB == "building2")
+					{
+						animBuilding2(userDataB.originalX, userDataB.originalY, 0, userDataB.actor, bodyB);
+					}
+					else if(nameB == "building3")
+					{
+						animBuilding3(userDataB.originalX, userDataB.originalY, 0, userDataB.actor, bodyB);
+					}
+					playCannonCollision(userDataB, userDataA);
+				}
+			}
+			else if(userDataA == null || userDataB == null)
+			{
+				playCannonCollision(userDataA, userDataB);
+			}
+			
+		}	
+	
+		if(bodies.indexOf(bodyA) == -1)
+			world.DestroyBody(bodyA);
+		else if(bodies.indexOf(bodyB) == -1)
+			world.DestroyBody(bodyB);
+			
+	}
+		
+		
+     </script>
+</head>
+<body onload="Start();">
+<canvas id="c" width="960" height="400"></canvas>
+<div id="gameoverPopup" class="modalDialog" >
+</div>
+<div id="directions" class="instructionsPopup" >
+</div>
+</body>
+</html>

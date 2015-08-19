@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>Cannonballs...</title>
+<link rel="stylesheet" href="css/style.css" />
+<meta name="music" content="on"/>
+<meta name="sound" content="on"/>
+<meta name="tracer" content="off"/>
+
+<link type="text/css"  rel="stylesheet" href="../css/cannongame.css"/>
+<link type="text/css"  rel="stylesheet" href="../css/global.css"/>
+
+<script src="https://apis.google.com/js/api:client.js"></script>
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="jquery.aw-showcase.js"></script>
+<script type="text/javascript" src="../js/ivank.js"></script>
+<script type="text/javascript" src="../util.js"></script>
+<script type="text/javascript" src="../js/jquery.cookie.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function()
+{
+	$("#showcase").awShowcase(
+	{
+		content_width:			600,
+		content_height:			300,
+		fit_to_parent:			false,
+		auto:					false,
+		interval:				3000,
+		continuous:				true,
+		loading:				true,
+		tooltip_width:			200,
+		tooltip_icon_width:		32,
+		tooltip_icon_height:	32,
+		tooltip_offsetx:		18,
+		tooltip_offsety:		0,
+		arrows:					true,
+		buttons:				false,
+		btn_numbers:			false,
+		keybord_keys:			true,
+		mousetrace:				false, /* Trace x and y coordinates for the mouse */
+		pauseonover:			true,
+		stoponclick:			false,
+		transition:				'hslide', /* hslide/vslide/fade */
+		transition_delay:		0,
+		transition_speed:		500,
+		show_caption:			'onload', /* onload/onhover/show */
+		thumbnails:				false,
+		thumbnails_position:	'outside-last', /* outside-last/outside-first/inside-last/inside-first */
+		thumbnails_direction:	'vertical', /* vertical/horizontal */
+		thumbnails_slidex:		1, /* 0 = auto / 1 = slide one thumbnail / 2 = slide two thumbnails / etc. */
+		dynamic_height:			false, /* For dynamic height to work in webkit you need to set the width and height of images in the source. Usually works to only set the dimension of the first slide in the showcase. */
+		speed_change:			false, /* Set to true to prevent users from swithing more then one slide at once. */
+		viewline:				false, /* If set to true content_width, thumbnails, transition and dynamic_height will be disabled. As for dynamic height you need to set the width and height of images in the source. */
+		custom_function:		null /* Define a custom function that runs on content change */
+	});
+});
+
+var startApp = function() {
+    gapi.load('auth2', function(){
+      // Retrieve the singleton for the GoogleAuth library and set up the client.
+      auth2 = gapi.auth2.init({
+        client_id: '902747574683-k8u1v83k39ifchc8lu6lo09efqebsug7.apps.googleusercontent.com',
+        cookiepolicy: 'single_host_origin',
+      });
+      attachSignin(document.getElementById('innergooglesignin'));
+    });
+};
+
+function attachSignin(element) {
+	
+	if($.cookie('cannongameemail') != undefined)
+	{
+		displayStages($.cookie('cannongameemail'));
+	}
+	else
+	{
+		auth2.attachClickHandler(element, {},function(googleUser) 
+		{
+			signinCallback(googleUser);
+		}, function(error)
+		{
+			consol.log(JSON.stringify(error, undefined, 2));
+		});
+	}
+}
+
+function signinCallback(googleUser) {
+
+	//Set email address in cookies
+	setEmailCookie(googleUser);
+	
+	//store cleared stages in db
+	storeStagesInDB(displayStages);
+	
+	//Display cleared stages as well
+//	displayStages();
+}
+
+function setEmailCookie(googleUser)
+{
+	$.cookie('cannongameemail', googleUser.getBasicProfile().getEmail(), { path:'/'});
+}
+
+</script>
+
+</head>
+<body style="background-image:url(../img/background_wall.jpg); background-size : cover; background-position:left bottom; background-repeat:no-repeat">
+
+		</div>
+<!--	<div id='firstscr' class="firstscreen"> -->
+		<!-- TODO Either change content slider for different browsers or make iFrame size adjustments for different browsers in this content slider only -->
+		<div>
+		<div id="showcase" class="showcase" style="margin: auto;">
+			<!-- Each child div in #showcase represents a slide -->
+			<!-- Each child div in #showcase represents a slide -->
+			<div class="showcase-slide" >
+				<!-- Put the slide content in a div with the class .showcase-content. -->
+				<iframe id="firstStageSet" src="stage_set_1.html" width="600px" height="300px" frameborder="0"></iframe>
+			</div>
+			<!-- Each child div in #showcase represents a slide -->
+			<div class="showcase-slide">
+				<!-- Put the slide content in a div with the class .showcase-content. -->
+				<iframe src="stage_set_2.html" width="600px" height="300px" frameborder="0"></iframe>
+			</div>
+			<!-- Each child div in #showcase represents a slide -->
+			<div class="showcase-slide">
+				<!-- Put the slide content in a div with the class .showcase-content. -->
+				<iframe src="stage_set_3.html" width="600px" height="300px" frameborder="0"></iframe>
+			</div>
+		<!-- Each child div in #showcase represents a slide -->
+		</div>
+		</div>
+		
+		<div class="showcase" sytle="position: relative;">
+			<iframe src="flagspage.html" style="width:600px; height:150px; left:0; right:0; position: absolute; margin: auto; overflow: hidden;" frameborder="0"></iframe>
+			<!--	<canvas id="c" style="width:500px; height:150px; left:0; right:0; position: absolute; margin: auto;" width="500px" height="150px"></canvas> -->
+		</div>		
+
+	    <div id="gsignin" class="googlesignin">
+			<div id="innergooglesignin">
+				<span class="icon"></span>
+			</div>	
+		</div>
+		<script>startApp();</script>
+</body>
+
+</html>
